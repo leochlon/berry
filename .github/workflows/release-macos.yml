@@ -17,7 +17,7 @@ jobs:
         include:
           - os: macos-14
             arch: arm64
-          - os: macos-13
+          - os: macos-13-large
             arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           import re
           text = Path("pyproject.toml").read_text(encoding="utf-8")
-          m = re.search(r'^version\\s*=\\s*\"([^\"]+)\"', text, re.M)
+          m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
           if not m:
               raise SystemExit("version not found in pyproject.toml")
           print(m.group(1))
