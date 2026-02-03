@@ -53,27 +53,6 @@ homebrew_casks:
       name: Berry Bot
       email: bot@hassana.ai
 
-# Winget manifest publishing (Windows).
-winget:
-  - name: berry
-    publisher: "Hassana Labs"
-    short_description: "Berry local MCP runtime + toolpack"
-    license: "MIT"
-    homepage: "https://github.com/hassana-labs/berry"
-    repository:
-      owner: microsoft
-      name: winget-pkgs
-
-# Scoop manifest publishing (Windows).
-scoops:
-  - name: berry
-    description: "Berry local MCP runtime + toolpack"
-    homepage: "https://github.com/hassana-labs/berry"
-    license: "MIT"
-    repository:
-      owner: hassana-labs
-      name: scoop-bucket
-
 # macOS notarization (requires Apple credentials); enable when distributing signed binaries.
 notarize:
   macos: []

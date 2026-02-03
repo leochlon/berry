@@ -50,7 +50,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           version: v2.13.3
-          args: release --skip=publish,winget,scoop,homebrew --clean
+          args: release --skip=publish --clean
       - name: GoReleaser dry run (snapshot)
         if: github.ref_type != 'tag'
         uses: goreleaser/goreleaser-action@v5

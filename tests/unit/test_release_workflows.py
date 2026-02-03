@@ -5,7 +5,7 @@ from pathlib import Path
 
 def test_goreleaser_config_contains_release_sections():
     text = Path(".goreleaser.yml").read_text(encoding="utf-8")
-    for key in ("homebrew_casks:", "winget:", "scoops:", "signs:", "notarize:"):
+    for key in ("homebrew_casks:", "signs:", "notarize:"):
         assert key in text
 
 
