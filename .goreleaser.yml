@@ -41,18 +41,6 @@ signs:
       - "${signature}"
       - "${artifact}"
 
-# Homebrew Cask publishing (macOS).
-homebrew_casks:
-  - name: berry
-    description: "Berry local MCP runtime + toolpack"
-    homepage: "https://github.com/hassana-labs/berry"
-    repository:
-      owner: hassana-labs
-      name: homebrew-tap
-    commit_author:
-      name: Berry Bot
-      email: bot@hassana.ai
-
 # macOS notarization (requires Apple credentials); enable when distributing signed binaries.
 notarize:
   macos: []
