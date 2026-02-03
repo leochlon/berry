@@ -117,7 +117,8 @@ jobs:
           security create-keychain -p "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security list-keychains -d user -s "$KEYCHAIN"
+          # Add custom keychain to search list while keeping login keychain
+          security list-keychains -d user -s "$KEYCHAIN" "$(security list-keychains -d user | head -1 | tr -d '\"' | xargs)"
 
           echo "$APPLE_APP_CERT_P12_BASE64" | base64 -d > "$RUNNER_TEMP/app.p12"
           security import "$RUNNER_TEMP/app.p12" \
