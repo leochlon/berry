@@ -17,7 +17,8 @@ jobs:
         include:
           - os: macos-14
             arch: arm64
-          - os: macos-13-large
+          # Intel build uses macos-15-large (macos-13 retired)
+          - os: macos-15-large
             arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
@@ -111,8 +112,8 @@ jobs:
             echo "Notarization disabled (missing App Store Connect notarization secrets)."
           fi
 
-      - name: Import Apple signing certificates (tags only)
-        if: startsWith(github.ref, 'refs/tags/') && steps.signing.outputs.can_sign == 'true'
+      - name: Import Apple signing certificates
+        if: steps.signing.outputs.can_sign == 'true'
         env:
           APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           APPLE_APP_CERT_P12_BASE64: ${{ secrets.APPLE_APP_CERT_P12_BASE64 }}
