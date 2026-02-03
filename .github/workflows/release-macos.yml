@@ -229,7 +229,7 @@ jobs:
           generate_release_notes: true
 
       - name: Update Homebrew tap cask (optional)
-        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+        if: vars.HOMEBREW_TAP_ENABLED == 'true'
         env:
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
