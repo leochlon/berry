@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+
+import pytest
 
 from berry.clients import berry_server_spec
 from berry.integration import integrate_with_claude, integrate_with_codex
@@ -29,6 +32,7 @@ def test_integrate_with_claude_skips_when_missing(tmp_path: Path, monkeypatch):
     assert "claude CLI not found" in res.message
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Bash-based dummy CLI does not work on Windows")
 def test_integrate_with_claude_invokes_cli(tmp_path: Path, monkeypatch):
     bindir = tmp_path / "bin"
     bindir.mkdir()
@@ -48,6 +52,7 @@ def test_integrate_with_claude_invokes_cli(tmp_path: Path, monkeypatch):
     assert after.strip().endswith("classic")
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Bash-based dummy CLI does not work on Windows")
 def test_integrate_with_codex_invokes_cli(tmp_path: Path, monkeypatch):
     bindir = tmp_path / "bin"
     bindir.mkdir()
@@ -67,6 +72,7 @@ def test_integrate_with_codex_invokes_cli(tmp_path: Path, monkeypatch):
     assert after.strip().endswith("classic")
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Bash-based dummy CLI does not work on Windows")
 def test_integrate_with_claude_nonzero_is_failure(tmp_path: Path, monkeypatch):
     # Even with non-zero CLI exit, the file-based integration succeeds,
     # so the overall status is "ok" with a note about CLI failure
