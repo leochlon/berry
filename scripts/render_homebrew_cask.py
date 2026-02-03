@@ -8,7 +8,7 @@ def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--version", required=True)
     p.add_argument("--sha256-arm64", required=True)
-    p.add_argument("--sha256-x86_64", required=True)
+    p.add_argument("--sha256-x86_64")
     p.add_argument("--identifier", default="com.hassana.berry")
     p.add_argument("--repo", default="hassana-labs/berry")
     p.add_argument("--out", required=True)
@@ -17,7 +17,8 @@ def main() -> int:
     version = str(args.version).strip().lstrip("v")
     out = Path(args.out)
 
-    rb = f'''cask "berry" do
+    if args.sha256_x86_64:
+        rb = f'''cask "berry" do
   version "{version}"
   arch arm: "arm64", intel: "x86_64"
 
@@ -33,6 +34,21 @@ def main() -> int:
   uninstall pkgutil: "{args.identifier}"
 end
 '''
+    else:
+        rb = f'''cask "berry" do
+  version "{version}"
+  sha256 "{args.sha256_arm64}"
+
+  url "https://github.com/{args.repo}/releases/download/v#{{version}}/berry-#{{version}}-macos-arm64.pkg"
+  name "Berry"
+  desc "Berry local MCP runtime + toolpack"
+  homepage "https://github.com/{args.repo}"
+
+  pkg "berry-#{{version}}-macos-arm64.pkg"
+
+  uninstall pkgutil: "{args.identifier}"
+end
+'''
 
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(rb, encoding="utf-8")
@@ -41,4 +57,3 @@ end
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
