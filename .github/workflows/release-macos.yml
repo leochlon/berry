@@ -11,16 +11,8 @@ permissions:
 
 jobs:
   build-pkg:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-14
-            arch: arm64
-          # Intel build uses macos-15-large (macos-13 retired)
-          - os: macos-15-large
-            arch: x86_64
-    runs-on: ${{ matrix.os }}
+    # ARM64 only for now (Intel runners require paid billing)
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
@@ -175,7 +167,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: berry-pkg-${{ matrix.arch }}
+          name: berry-pkg-arm64
           path: ${{ steps.pkg.outputs.pkg_path }}
           if-no-files-found: error
 
@@ -199,24 +191,20 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           ARM_PKG="$(find artifacts -type f -name "*-macos-arm64.pkg" | head -n1)"
-          INTEL_PKG="$(find artifacts -type f -name "*-macos-x86_64.pkg" | head -n1)"
-          if [[ -z "$ARM_PKG" || -z "$INTEL_PKG" ]]; then
-            echo "Missing required pkg artifacts" >&2
+          if [[ -z "$ARM_PKG" ]]; then
+            echo "Missing ARM64 pkg artifact" >&2
             find artifacts -type f -maxdepth 4 -print >&2 || true
             exit 1
           fi
           SHA_ARM="$(sha256sum "$ARM_PKG" | awk '{print $1}')"
-          SHA_INTEL="$(sha256sum "$INTEL_PKG" | awk '{print $1}')"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "sha_arm64=$SHA_ARM" >> "$GITHUB_OUTPUT"
-          echo "sha_x86_64=$SHA_INTEL" >> "$GITHUB_OUTPUT"
 
       - name: Generate Homebrew cask file
         run: |
           python scripts/render_homebrew_cask.py \
             --version "${{ steps.sums.outputs.version }}" \
             --sha256-arm64 "${{ steps.sums.outputs.sha_arm64 }}" \
-            --sha256-x86_64 "${{ steps.sums.outputs.sha_x86_64 }}" \
             --identifier "com.hassana.berry" \
             --repo "${GITHUB_REPOSITORY}" \
             --out "berry.rb"
@@ -238,7 +226,6 @@ jobs:
           python scripts/render_homebrew_cask.py \
             --version "${{ steps.sums.outputs.version }}" \
             --sha256-arm64 "${{ steps.sums.outputs.sha_arm64 }}" \
-            --sha256-x86_64 "${{ steps.sums.outputs.sha_x86_64 }}" \
             --identifier "com.hassana.berry" \
             --repo "${GITHUB_REPOSITORY}" \
             --out "tap/Casks/berry.rb"
