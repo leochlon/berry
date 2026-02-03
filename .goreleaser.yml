@@ -1,0 +1,79 @@
+# GoReleaser release config (template).
+# This file is intentionally conservative and may require release-time secrets.
+
+version: 2
+project_name: berry
+dist: dist-goreleaser
+
+release:
+  draft: true
+
+before:
+  hooks:
+    - python -m pip install -U build
+    - python -m build
+
+# GoReleaser expects build artifacts; enable and adjust when packaging strategy is finalized.
+builds:
+  - id: python-dist
+    builder: uv
+    skip: true
+
+archives:
+  - id: berry
+    ids: [python-dist]
+    formats: [zip]
+    name_template: "berry_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - dist/*
+
+checksum:
+  name_template: "checksums.txt"
+
+# Sign artifacts with cosign (keyless or key-backed via env).
+signs:
+  - artifacts: checksum
+    cmd: cosign
+    args:
+      - sign-blob
+      - "--yes"
+      - "--output-signature"
+      - "${signature}"
+      - "${artifact}"
+
+# Homebrew Cask publishing (macOS).
+homebrew_casks:
+  - name: berry
+    description: "Berry local MCP runtime + toolpack"
+    homepage: "https://github.com/hassana-labs/berry"
+    repository:
+      owner: hassana-labs
+      name: homebrew-tap
+    commit_author:
+      name: Berry Bot
+      email: bot@hassana.ai
+
+# Winget manifest publishing (Windows).
+winget:
+  - name: berry
+    publisher: "Hassana Labs"
+    short_description: "Berry local MCP runtime + toolpack"
+    license: "MIT"
+    homepage: "https://github.com/hassana-labs/berry"
+    repository:
+      owner: microsoft
+      name: winget-pkgs
+
+# Scoop manifest publishing (Windows).
+scoops:
+  - name: berry
+    description: "Berry local MCP runtime + toolpack"
+    homepage: "https://github.com/hassana-labs/berry"
+    license: "MIT"
+    repository:
+      owner: hassana-labs
+      name: scoop-bucket
+
+# macOS notarization (requires Apple credentials); enable when distributing signed binaries.
+notarize:
+  macos: []

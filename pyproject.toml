@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "berry"
+version = "0.1.0"
+description = "Berry: a local MCP runtime + opinionated toolpack for coding agents (works across MCP-enabled CLIs)"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+authors = [{ name = "Hassana Labs" }]
+# Prefer SPDX string over a TOML table (setuptools deprecates the table form).
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  "mcp[cli]>=1.0.0",
+  "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.24",
+]
+
+[project.scripts]
+berry = "berry.cli:main"
+berry-mcp = "berry.mcp_server:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+markers = []
