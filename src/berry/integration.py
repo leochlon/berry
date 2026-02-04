@@ -66,13 +66,13 @@ def _upsert_codex_toml(path: Path, spec: McpServerSpec) -> None:
 
     import re
 
-    pat = re.compile(rf"^\[mcp_servers\.{re.escape(spec.name)}\]\n(?:.*\n)*?(?=^\[mcp_servers\.|\Z)", re.M)
-    if pat.search(text):
-        new_text = pat.sub(block + "\n", text)
-    else:
-        sep = "\n" if text and not text.endswith("\n") else ""
-        new_text = text + sep + block + "\n"
-    path.write_text(new_text, encoding="utf-8")
+    pat = re.compile(
+        rf"^\[mcp_servers\.{re.escape(spec.name)}(?:\.env)?\]\n(?:.*\n)*?(?=^\[mcp_servers\.|\Z)",
+        re.M,
+    )
+    new_text = pat.sub("", text).rstrip()
+    sep = "\n\n" if new_text else ""
+    path.write_text(new_text + sep + block + "\n", encoding="utf-8")
 
 
 @dataclass(frozen=True)
