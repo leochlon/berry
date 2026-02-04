@@ -74,6 +74,7 @@ berry integrate
 
 ## Docs
 
+- Strawberry docs: https://strawberry.hassana.io/docs
 - `docs/USAGE.md` — task‑oriented guides
 - `docs/CLI.md` — command reference
 - `docs/CONFIGURATION.md` — config files, defaults, and env vars
