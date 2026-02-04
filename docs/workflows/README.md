@@ -25,31 +25,31 @@ If you don’t have direct access to collect evidence (repo browsing, web search
 
 If you’re using a client that drifts, don’t fight it — **pin the “Copy/paste prompt” block** from each playbook as a system instruction, and explicitly require the tool call before a final answer.
 
-**Two tools, five workflows:**
-- `detect_hallucination` — verify a cited answer sentence-by-sentence
+**One tool, five workflows:**
 - `audit_trace_budget` — verify a cited reasoning trace (claims + cites)
+- If a verifier is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
 ## Pick your workflow
 
 1) **Search & Learn** → `SEARCH_AND_LEARN_VERIFICATION.md`
-   Q&A / repo exploration / API understanding. Uses `detect_hallucination`.
+   Q&A / repo exploration / API understanding. Uses `audit_trace_budget` (short trace).
 
 2) **Generate Boilerplate/Content** → `GENERATE_BOILERPLATE_VERIFICATION.md`
-   Tests/docs/migrations/configs. Uses `audit_trace_budget` to verify *constraints and decisions*.
+   Tests/docs/migrations/configs. Uses `audit_trace_budget` on the trace to verify *constraints and decisions*.
 
 3) **Inline Completions** → `INLINE_COMPLETION_VERIFICATION.md`
-   Spot-check high-impact tab-complete. Uses `audit_trace_budget` with a 3–6 step micro-trace.
+   Spot-check high-impact tab-complete. Uses `audit_trace_budget` on a 3–6 step micro-trace.
 
-4) **Refactoring & Bug Fixes** → `REFACTOR_AND_BUGFIX_VERIFICATION.md`
-   RCA-gated changes with an audited claim trace. Uses `audit_trace_budget`.
+4) **Greenfield Prototyping** → `GREENFIELD_PROTOTYPE_VERIFICATION.md`
+   Move fast with **Facts vs Decisions vs Assumptions**, and verify Facts via `audit_trace_budget` (trace of Facts).
 
-5) **Greenfield Prototyping** → `GREENFIELD_PROTOTYPE_VERIFICATION.md`
-   Move fast with **Facts vs Decisions vs Assumptions**, and verify Facts via `detect_hallucination`.
+5) **Plan and Execute** → `PLAN_AND_EXECUTE_VERIFICATION.md`
+   Repo understanding + verified plan. Dry-run only (no commands or edits). Uses `audit_trace_budget` on plan steps.
 
 6) **RCA Fix Agent** → MCP prompt `rca_fix_agent` + `RCA_FIX_REPORT_TEMPLATE.md`
-   Full debugging loop: baseline → hypotheses → verify ROOT_CAUSE → fix → test → verify claims. Uses `audit_trace_budget` with minimum claims (ROOT_CAUSE, FIX_MECHANISM, FIX_VERIFIED, NO_NEW_FAILURES).
+   Full debugging loop: baseline → hypotheses → verify ROOT_CAUSE → fix → test → verify claims. Uses `audit_trace_budget` for minimum claims (ROOT_CAUSE, FIX_MECHANISM, FIX_VERIFIED, NO_NEW_FAILURES).
 
 ---
 
@@ -57,4 +57,3 @@ If you’re using a client that drifts, don’t fight it — **pin the “Copy/p
 Each playbook includes a worked example with:
 - **❌ Without Strawberry** — a plausible, confident answer that’s easy to hallucinate
 - **✅ With Strawberry** — evidence pack spans + citations + a verifier call, ending in an answer you can trust
-

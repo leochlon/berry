@@ -7,7 +7,7 @@ Use this in "vibe code" prototyping where requirements are incomplete.
 The pattern:
 1) Extract **Facts** from evidence spans (requirements, constraints, repo context, experiments).
 2) Put everything else into **Decisions** or **Assumptions**.
-3) Verify the Facts section with `detect_hallucination`.
+3) Verify the Facts section with `audit_trace_budget` (trace of Facts).
 
 ---
 
@@ -50,7 +50,7 @@ Suggested spans:
 ## Verification
 Run:
 
-- Tool: `detect_hallucination`
+- Tool: `audit_trace_budget` (trace of Facts)
 - Recommended settings:
   - `require_citations=true`
   - `context_mode="cited"`
@@ -59,6 +59,7 @@ Run:
 If any Fact is flagged:
 - move it to Assumptions **or**
 - request additional evidence spans
+- If the verifier is run 3 times in a row, **STOP** and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
@@ -76,7 +77,7 @@ If any Fact is flagged:
 
 It reads great — and it’s mostly invented unless explicitly required.
 
-### ✅ With Strawberry (Facts vs Decisions vs Assumptions + `detect_hallucination`)
+### ✅ With Strawberry (Facts vs Decisions vs Assumptions + `audit_trace_budget`)
 
 #### 1) Evidence pack
 **S0 — requirements**
@@ -97,8 +98,9 @@ Events may contain PII. Must support deletion by user_id.
 #### 2) Copy/paste prompt
 > Produce three sections: **Facts**, **Decisions**, **Assumptions**.  
 > Every Fact must be cited `[S#]`.  
-> Run `detect_hallucination(require_citations=true, context_mode="cited")` on the Facts section only.  
+> Run `audit_trace_budget(steps=..., require_citations=true, context_mode="cited")` on the Facts section only.  
 > If any Fact is flagged, move it to Assumptions.
+> If the verifier is run 3 times in a row, stop and return only the claims that passed plus the claims that flagged and why they flagged.
 
 #### 3) Output (example)
 **Facts**
@@ -119,9 +121,14 @@ Events may contain PII. Must support deletion by user_id.
 #### 4) Verifier call (example)
 ```json
 {
-  "tool": "detect_hallucination",
+  "tool": "audit_trace_budget",
   "args": {
-    "answer": "Facts: The API must expose POST /events and return 202 quickly. [S0] ...",
+    "steps": [
+      {"idx": 0, "claim": "The API must expose POST /events and return 202 quickly.", "cites": ["S0"]},
+      {"idx": 1, "claim": "Events are stored in Postgres.", "cites": ["S0"]},
+      {"idx": 2, "claim": "v1 must not use a message broker and is deployed as a single service.", "cites": ["S1"]},
+      {"idx": 3, "claim": "Events may contain PII and deletion by user_id must be supported.", "cites": ["S2"]}
+    ],
     "spans": [
       {"sid":"S0","text":"..."},
       {"sid":"S1","text":"..."},
@@ -135,4 +142,3 @@ Events may contain PII. Must support deletion by user_id.
 ```
 
 **Why this is a “wow” difference:** Strawberry forces the prototype to be *honest*. You can still move fast — but now you can tell what’s real vs what’s invented.
-

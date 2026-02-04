@@ -45,7 +45,7 @@ Example step shape:
 ## Verification
 Run the verifier:
 
-- Tool: `audit_trace_budget`
+- Tool: `audit_trace_budget` (on the trace text)
 - Recommended settings:
   - `require_citations=true`
   - `context_mode="cited"`
@@ -54,6 +54,7 @@ Run the verifier:
 If anything is flagged:
 - revise the artifact (or downgrade the claim to an assumption)
 - explicitly request the missing evidence instead of guessing
+- If the verifier is run 3 times in a row, **STOP** and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
@@ -105,8 +106,9 @@ ALTER TABLE account_users ADD COLUMN tenant_id uuid references tenants(id);
 > Generate the migration + doc update.  
 > Then produce a trace (8–12 steps) of the key requirements and design choices.  
 > Every step must cite spans `[S#]`.  
-> Run `audit_trace_budget(require_citations=true, context_mode="cited", default_target=0.95)`.  
+> Run `audit_trace_budget(steps=..., require_citations=true, context_mode="cited", default_target=0.95)` on the trace text.  
 > If a step is unsupported, mark it as an assumption or ask for more evidence.
+> If the verifier is run 3 times in a row, stop and return only the claims that passed plus the claims that flagged and why they flagged.
 
 #### 3) Verification trace (what gets audited)
 ```json
@@ -157,4 +159,3 @@ ON account_users (tenant_id, lower(email));
 - Uniqueness is case-insensitive (enforced by a lower(email) unique index). [S2]
 
 **Why this is a “wow” difference:** Strawberry verifies the *reasons* behind the boilerplate, so the output encodes real constraints instead of plausible SQL.
-

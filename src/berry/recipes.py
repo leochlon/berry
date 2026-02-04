@@ -17,27 +17,6 @@ class Recipe:
 
 _BUILTIN: List[Recipe] = [
     Recipe(
-        name="pr-prep",
-        title="Prepare a PR",
-        description="Workflow prompt pack for preparing a clean PR (summary, risks, test plan).",
-        author="Berry",
-        prompts=["prepare_pr"],
-    ),
-    Recipe(
-        name="test-triage",
-        title="Trace a failing test",
-        description="Workflow prompt pack for debugging failing tests quickly.",
-        author="Berry",
-        prompts=["trace_failing_test"],
-    ),
-    Recipe(
-        name="repo-architecture",
-        title="Summarize repo architecture",
-        description="Workflow prompt pack for producing an architecture summary and component map.",
-        author="Berry",
-        prompts=["summarize_repo_architecture"],
-    ),
-    Recipe(
         name="search-learn",
         title="Search & Learn (verified)",
         description="Workflow prompt pack for evidence-backed Q&A with hallucination detection.",

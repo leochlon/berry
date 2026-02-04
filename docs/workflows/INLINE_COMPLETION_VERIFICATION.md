@@ -49,7 +49,7 @@ Example:
 ## Verification
 Run the verifier:
 
-- Tool: `audit_trace_budget`
+- Tool: `audit_trace_budget` (on the trace text)
 - Recommended settings:
   - `require_citations=true`
   - `context_mode="cited"`
@@ -58,6 +58,7 @@ Run the verifier:
 If anything is flagged:
 - do **not** “explain it away”
 - propose a safer edit, or request the missing evidence span (contract/test/log)
+- If the verifier is run 3 times in a row, **STOP** and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
@@ -94,8 +95,9 @@ retry(fn, {retries}) retries on ANY thrown error.
 #### 2) Copy/paste prompt
 > Produce a 3–6 step trace explaining why this completion is safe/correct.  
 > Cite S0–S2.  
-> Run `audit_trace_budget(require_citations=true, context_mode="cited", default_target=0.95)`.  
+> Run `audit_trace_budget(steps=..., require_citations=true, context_mode="cited", default_target=0.95)` on the trace text.  
 > If unsafe or unsupported, propose a safer alternative.
+> If the verifier is run 3 times in a row, stop and return only the claims that passed plus the claims that flagged and why they flagged.
 
 #### 3) Micro-trace (grounded)
 ```json
@@ -135,4 +137,3 @@ retry(fn, {retries}) retries on ANY thrown error.
 - If you need reliability, introduce idempotency keys + server-side dedupe **only if** supported by specs (otherwise label as Assumption and request requirements). [S0]
 
 **Why this is a “wow” difference:** Strawberry turns “tab complete” into something you can safely accept — because it forces the model to prove the change is consistent with the local contract.
-

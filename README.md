@@ -8,8 +8,8 @@ Want the “with vs without hallucination detector” experience? Start here:
   - Search & Learn
   - Generate Boilerplate/Content
   - Inline Completions
-  - Refactoring & Bug Fixes (RCA-gated)
   - Greenfield Prototyping
+  - RCA Fix Agent
 
 Each playbook includes a **maximally contrasting** worked example (❌ vibes vs ✅ evidence + verifier).
 
@@ -70,7 +70,7 @@ berry integrate
 #   berry integrate --managed-only
 ```
 
-4) Use a prompt/workflow (Prepare PR, Trace failing test, Summarize repo architecture, Search & Learn (verified), Generate Boilerplate/Content (verified), Inline completion guard, Greenfield prototyping).
+4) Use a prompt/workflow (Search & Learn (verified), Generate Boilerplate/Content (verified), Inline completion guard, Greenfield prototyping, RCA Fix Agent).
 
 ## Docs
 

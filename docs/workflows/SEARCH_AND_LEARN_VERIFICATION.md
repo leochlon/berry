@@ -38,7 +38,7 @@ Example span types:
 ## Verification
 Run the verifier:
 
-- Tool: `detect_hallucination`
+- Tool: `audit_trace_budget` (with a short trace of key claims)
 - Recommended settings:
   - `require_citations=true`
   - `context_mode="cited"` (strict: only cited spans count)
@@ -46,6 +46,7 @@ Run the verifier:
 If anything is flagged:
 - rewrite the answer to remove or downgrade unsupported claims
 - list what additional evidence would resolve each gap
+- If the verifier is run 3 times in a row, **STOP** and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
@@ -64,7 +65,7 @@ If anything is flagged:
 - “disable audience validation” advice may be incorrect for the library in use
 - it’s unverifiable unless you manually hunt through the repo
 
-### ✅ With Strawberry (evidence-first + `detect_hallucination`)
+### ✅ With Strawberry (evidence-first + `audit_trace_budget`)
 
 #### 1) Evidence pack (spans you collect or paste)
 **S0 — middleware code**
@@ -96,7 +97,8 @@ JWT_ISSUER=
 > Answer using **only** evidence in S0–S2.  
 > Every factual sentence must end with citations like `[S0]`.  
 > If something is unknown, say “unknown from evidence.”  
-> Then run `detect_hallucination(require_citations=true, context_mode="cited")` and revise if flagged.
+> Then run `audit_trace_budget(steps=..., require_citations=true, context_mode="cited")` and revise if flagged.  
+> If the verifier is run 3 times in a row, stop and return only the claims that passed plus the claims that flagged and why they flagged.
 
 #### 3) Cited answer (draft)
 Auth validates **issuer** via the `issuer:` option passed into `jwtVerify(...)`. [S0]  
@@ -108,9 +110,14 @@ The README explicitly says `JWT_ISSUER` is required and that no other JWT settin
 #### 4) Verifier call (example)
 ```json
 {
-  "tool": "detect_hallucination",
+  "tool": "audit_trace_budget",
   "args": {
-    "answer": "Auth validates issuer via the issuer option... [S0] ...",
+    "steps": [
+      {"idx": 0, "claim": "Auth validates issuer via the issuer option in jwtVerify.", "cites": ["S0"]},
+      {"idx": 1, "claim": "The issuer value comes from process.env.JWT_ISSUER.", "cites": ["S0"]},
+      {"idx": 2, "claim": "Audience validation is not evidenced in the provided middleware.", "cites": ["S0"]},
+      {"idx": 3, "claim": "README states JWT_ISSUER is required and no other JWT settings are supported.", "cites": ["S1"]}
+    ],
     "spans": [
       {"sid":"S0","text":"..."},
       {"sid":"S1","text":"..."},

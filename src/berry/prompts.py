@@ -13,89 +13,11 @@ class Prompt:
 
 
 _PROMPTS: List[Prompt] = [
-    Prompt(
-        name="prepare_pr",
-        title="Prepare PR",
-        description="Create a PR description: summary, rationale, risks, test plan, rollout.",
-        template=(
-            "You are preparing a pull request.\n"
-            "Output:\n"
-            "1) Summary\n"
-            "2) Rationale\n"
-            "3) Key changes\n"
-            "4) Risks\n"
-            "5) Test plan\n"
-            "6) Rollout / backwards compatibility\n"
-        ),
-    ),
-    Prompt(
-        name="trace_failing_test",
-        title="Trace failing test",
-        description="Debug a failing test systematically and propose a minimal fix + regression test.",
-        template=(
-            "You are debugging a failing test.\n"
-            "1) Restate failure signal\n"
-            "2) Identify likely root causes\n"
-            "3) Propose discriminating experiments\n"
-            "4) Propose minimal fix\n"
-            "5) Add/adjust regression test\n"
-        ),
-    ),
-    Prompt(
-        name="summarize_repo_architecture",
-        title="Summarize repo architecture",
-        description="Summarize modules, boundaries, data flow, and key commands.",
-        template=(
-            "Summarize this repository:\n"
-            "- High-level purpose\n"
-            "- Folder/module map\n"
-            "- Key flows (data/control)\n"
-            "- How to run/test/build\n"
-            "- Where to start reading code\n"
-        ),
-    ),
-    Prompt(
-        name="plan_and_execute",
-        title="Plan and execute",
-        description=(
-            "Plan-first workflow with explicit approvals and safe exploration (web/experiments) before verified changes."
-        ),
-        template=(
-            "Follow a plan-first workflow.\n"
-            "\n"
-            "1) Planning phase\n"
-            "- Write a clear plan (bullets)\n"
-            "- List assumptions and what evidence will confirm/deny them\n"
-            "- If you need web research, exec, or writes, ask for explicit permission first (use the unified grants model)\n"
-            "\n"
-            "2) Execution checkpoint\n"
-            "After you present the plan, ask the user to choose an execution mode:\n"
-            "1. Proceed and grant the requested permissions (recommended)\n"
-            "2. Proceed but ask me to approve each permission as it comes up\n"
-            "3. Proceed but require manual approval for writes only\n"
-            "4. Tell me what to change in the plan / add context\n"
-            "\n"
-            "3) Execute phase (after approval)\n"
-            "- Gather evidence (repo spans / experiment output / fetched pages)\n"
-            "- For experiments: request_grant(scopes=['exec']) → grant(...) → run minimal commands → store outputs\n"
-            "- For web: request_grant(scopes=['web']) → grant(...) → search/fetch → store as spans\n"
-            "\n"
-            "4) Verified changes\n"
-            "- Propose writes using `propose_write` with a `change_summary` supported by the diff\n"
-            "- To apply changes: request_grant(scopes=['write']) → grant(...) → apply_write\n"
-            "- Cite evidence for the motivation/rationale\n"
-            "- Add/update tests\n"
-            "\n"
-            "If verification fails due to missing trusted evidence, ask the user for additional sources and/or request\n"
-            "trust_user_evidence then use attest_spans to promote user-provided spans to trusted evidence.\n"
-        ),
-    ),
-
     # ------------------------------------------------------------------
     # Workflow skills: verification as a first-class step
     #
     # These prompts are designed to be used with the hallucination detector
-    # tools (`detect_hallucination`, `audit_trace_budget`) to catch “vibes”
+    # tool (`audit_trace_budget`) to catch “vibes”
     # and “almost right” output before it ships.
     # ------------------------------------------------------------------
 
@@ -114,8 +36,10 @@ _PROMPTS: List[Prompt] = [
             "\n"
             "## Verification step\n"
             "After drafting the answer, call:\n"
-            "- `detect_hallucination(answer=..., spans=..., require_citations=true, context_mode='cited')`\n"
-            "If verification flags anything, rewrite the answer to remove/soften unsupported claims.\n"
+            "- `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')` (use a short trace of key claims)\n"
+            "If verification flags anything, gather more evidence to close the gap and re-run verification.\n"
+            "If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
+            "Otherwise return only the claims that pass.\n"
             "\n"
             "## Output format\n"
             "### Problem / question\n"
@@ -151,8 +75,9 @@ _PROMPTS: List[Prompt] = [
             "- Code blocks themselves are hard to verify sentence-by-sentence. Instead, verify the **design intent**.\n"
             "- Produce a short **trace** of key claims (5–15 steps) that the artifact depends on.\n"
             "- Each step must include `claim` + `cites: ['S#', ...]`.\n"
-            "- Call: `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')`.\n"
+            "- Call `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')`.\n"
             "- If flagged: revise the trace AND the generated artifact until the trace passes, or downgrade items to Assumptions.\n"
+            "- If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
             "\n"
             "## Output format\n"
             "### Artifact request\n"
@@ -195,8 +120,9 @@ _PROMPTS: List[Prompt] = [
             "\n"
             "## Verification step\n"
             "- Write a micro-trace of 3–8 steps: `{idx, claim, cites}`.\n"
-            "- Call: `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')`.\n"
+            "- Call `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')`.\n"
             "- If flagged: propose the smallest edit that makes the change evidence-consistent, or recommend rejecting it.\n"
+            "- If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
             "\n"
             "## Output format\n"
             "### What changed\n"
@@ -238,8 +164,9 @@ _PROMPTS: List[Prompt] = [
             "\n"
             "## Verification step\n"
             "- After writing the Facts section, call:\n"
-            "  `detect_hallucination(answer=<Facts section>, spans=..., require_citations=true, context_mode='cited')`\n"
+            "  `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')` (use a short trace of Facts)\n"
             "- If anything is flagged, move it out of Facts (into Assumptions) or request more evidence.\n"
+            "- If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
             "\n"
             "## Output format\n"
             "### Goal\n"
@@ -264,7 +191,7 @@ _PROMPTS: List[Prompt] = [
             "- For each assumption, propose the quickest experiment or evidence source to confirm/deny it.\n"
             "\n"
             "### Verification\n"
-            "- Paste the `detect_hallucination` summary + any flagged claims (Facts section only).\n"
+            "- Paste the `audit_trace_budget` summary + any flagged claims (Facts section only).\n"
             "\n"
             "### Graduation / rewrite plan\n"
             "- What you would rewrite, harden, and test once the prototype proves value.\n"
@@ -286,11 +213,12 @@ _PROMPTS: List[Prompt] = [
             "Maintain spans `S0`, `S1`, ... where each span is raw evidence with source (file:lines, command output, URL).\n"
             "\n"
             "## Minimum verification claims\n"
-            "You must verify these with `audit_trace_budget` or `detect_hallucination`:\n"
+            "You must verify these with `audit_trace_budget`:\n"
             "1. **ROOT_CAUSE**: \"The issue is because of X.\" [cited]\n"
             "2. **FIX_MECHANISM**: \"The fix works because it changes X which prevents Y.\" [cited]\n"
             "3. **FIX_VERIFIED**: \"The original repro now passes.\" [cite test output]\n"
             "4. **NO_NEW_FAILURES**: \"The regression suite passes.\" [cite test output]\n"
+            "If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
             "\n"
             "## Workflow\n"
             "\n"
@@ -339,6 +267,89 @@ _PROMPTS: List[Prompt] = [
             "## Stop conditions\n"
             "Stop when: original repro passes, regression checks pass, and minimum claims are not flagged.\n"
             "If any are false, continue iterating.\n"
+        ),
+    ),
+
+    Prompt(
+        name="plan_and_execute",
+        title="Plan and Execute (verified, dry-run plan)",
+        description=(
+            "Explore a repo with evidence, then propose a verified plan with explicit file changes "
+            "and tests, without running commands or editing files."
+        ),
+        template=(
+            "You are in **Plan and Execute** mode.\n"
+            "\n"
+            "## Phase 1 — Search & Learn (repo understanding)\n"
+            "- Use the Search & Learn verification pattern to explore and understand the repo.\n"
+            "- Build an Evidence pack of spans `S0`, `S1`, ... (repo excerpts, docs, configs).\n"
+            "- Every factual sentence must end with citations like `[S0]`.\n"
+            "- If you cannot cite, label it **Unknown** or **Assumption**.\n"
+            "- After drafting the repo understanding, call:\n"
+            "  `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')`\n"
+            "- If flagged: gather more evidence and re-run.\n"
+            "- If `audit_trace_budget` is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.\n"
+            "\n"
+            "## Phase 2 — Plan (Greenfield-style, but for changes)\n"
+            "- Produce **Facts (cited)**, **Decisions**, **Assumptions** based on the evidence.\n"
+            "- Then propose a plan with **explicit steps** that includes:\n"
+            "  - unit tests to add/update\n"
+            "  - integration tests to add/update\n"
+            "  - exact files to change (paths and what will change)\n"
+            "\n"
+            "## Phase 3 — Dry-run plan only\n"
+            "- Do NOT run commands or edit files.\n"
+            "- Output only a dry-run plan that outlines the exact file changes.\n"
+            "\n"
+            "## Phase 4 — Approval gate\n"
+            "- Ask the user to approve the plan before any execution.\n"
+            "- If not approved, return to Phase 2 and revise the plan.\n"
+            "\n"
+            "## Phase 5 — Execute (only after approval)\n"
+            "- Implement the planned edits as real patches.\n"
+            "- Run the planned unit and integration tests.\n"
+            "- If tests fail or evidence contradicts the plan, return to Phase 2 and revise.\n"
+            "- Repeat until tests pass or the user stops the loop.\n"
+            "\n"
+            "## Verification (plan steps)\n"
+            "- Create a trace where each step is a plan step `{idx, claim, cites}`.\n"
+            "- Call `audit_trace_budget(steps=..., spans=..., require_citations=true, context_mode='cited')` on the plan steps.\n"
+            "- If any step is flagged, revise the plan to remove or downgrade unsupported steps.\n"
+            "- If `audit_trace_budget` is run 3 times in a row, STOP and return only the steps that passed plus the steps that flagged and why they flagged.\n"
+            "\n"
+            "## Output format\n"
+            "### Problem / request\n"
+            "- What is being requested and why?\n"
+            "\n"
+            "### Evidence pack\n"
+            "> List `S0`, `S1`, ... and what each span represents.\n"
+            "\n"
+            "### Repo understanding (cited)\n"
+            "- Short, cited summary of relevant architecture, modules, and constraints.\n"
+            "\n"
+            "### Facts (cited)\n"
+            "- Only proven constraints/requirements.\n"
+            "\n"
+            "### Decisions\n"
+            "- Explicit tradeoffs and chosen approach (cite if constrained by evidence).\n"
+            "\n"
+            "### Assumptions / unknowns\n"
+            "- Any gaps or needed clarifications.\n"
+            "\n"
+            "### Dry-run plan (exact file changes)\n"
+            "- Step-by-step plan including unit + integration tests and file paths.\n"
+            "\n"
+            "### Approval request\n"
+            "- Ask the user to approve the plan before execution.\n"
+            "\n"
+            "### Verification (plan trace)\n"
+            "- JSON array of `{idx, claim, cites}` for plan steps.\n"
+            "\n"
+            "### Audit result\n"
+            "- Paste the `audit_trace_budget` summary + any flagged steps.\n"
+            "\n"
+            "### Next evidence to collect\n"
+            "- If any Assumptions remain, list the exact file paths or commands needed to confirm them.\n"
         ),
     ),
 ]

@@ -730,7 +730,7 @@ def cmd_quickstart(_: argparse.Namespace) -> int:
     print("3) Optional: run `berry integrate` to register Berry globally in supported clients (Cursor, Claude Code, Codex, Gemini CLI).")
     print("4) In your repo root: run `berry init` to create repo-scoped MCP config files.")
     print("5) In your MCP client (Cursor/Codex/Claude Code/Gemini CLI), reload MCP servers for the repo.")
-    print("6) Run the prompt/workflow (e.g., Prepare PR / Trace failing test / Summarize repo architecture).")
+    print("6) Run a prompt/workflow (Search & Learn, Generate Boilerplate/Content, Inline completion guard, Greenfield prototyping, RCA Fix Agent).")
     return 0
 
 

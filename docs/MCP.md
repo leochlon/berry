@@ -48,10 +48,6 @@ Berry exposes a focused set of tools for evidence collection and hallucination d
 >
 > If you see drift, pin the playbook prompt text as a system instruction and insist the verifier tools are called before final answers.
 
-- Prepare PR
-- Trace failing test
-- Summarize repo architecture
-- Plan and execute
 - Search & Learn (verified)
 - Generate Boilerplate/Content (verified)
 - Inline completion guard (verified)

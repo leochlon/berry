@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from berry.clients import berry_server_spec
-from berry.integration import integrate_with_claude, integrate_with_codex
+from berry.clients import McpServerSpec, berry_server_spec
+from berry.integration import _upsert_codex_toml, integrate_with_claude, integrate_with_codex
 
 
 def _write_dummy_cli(path: Path, log: Path, exit_code: int = 0) -> None:
@@ -87,3 +87,35 @@ def test_integrate_with_claude_nonzero_is_failure(tmp_path: Path, monkeypatch):
     # File integration succeeds, so status is "ok" even if CLI fails
     assert res.status == "ok"
     assert "cli failed" in res.message.lower() or "non-fatal" in res.message.lower()
+
+
+def test_upsert_codex_toml_overwrites_env_block(tmp_path: Path):
+    codex_toml = tmp_path / ".codex" / "config.toml"
+    codex_toml.parent.mkdir(parents=True, exist_ok=True)
+    codex_toml.write_text(
+        (
+            "[mcp_servers.berry]\n"
+            "command = \"berry\"\n"
+            "args = [\"mcp\"]\n"
+            "\n"
+            "[mcp_servers.berry.env]\n"
+            "\"OPENAI_API_KEY\" = \"old\"\n"
+            "\n"
+            "[mcp_servers.berry.env]\n"
+            "\"OPENAI_API_KEY\" = \"older\"\n"
+        ),
+        encoding="utf-8",
+    )
+    base = berry_server_spec(name="berry")
+    spec = McpServerSpec(
+        name=base.name,
+        command=base.command,
+        args=base.args,
+        env={"OPENAI_API_KEY": "new"},
+    )
+    _upsert_codex_toml(codex_toml, spec)
+    updated = codex_toml.read_text(encoding="utf-8")
+    assert updated.count("[mcp_servers.berry]") == 1
+    assert updated.count("[mcp_servers.berry.env]") == 1
+    assert "\"OPENAI_API_KEY\" = \"new\"" in updated
+    assert "\"OPENAI_API_KEY\" = \"old\"" not in updated

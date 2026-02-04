@@ -16,7 +16,7 @@ def test_builtin_recipes_nonempty():
 
 
 def test_install_recipe_to_project(tmp_repo):
-    r = get_builtin_recipe("pr-prep")
+    r = get_builtin_recipe("search-learn")
     assert r is not None
     out = install_recipe_to_project(r, project_root=tmp_repo)
     assert out.exists()
@@ -30,7 +30,7 @@ def test_install_recipe_file_to_project(tmp_repo, tmp_path):
         "title": "Custom Recipe",
         "description": "A shared recipe for testing import.",
         "author": "Test",
-        "prompts": ["prepare_pr"],
+        "prompts": ["search_and_learn_verified"],
     }
     src = tmp_path / "recipe.json"
     src.write_text(json.dumps(payload), encoding="utf-8")

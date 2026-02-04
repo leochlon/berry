@@ -191,7 +191,7 @@ berry recipes export --out /tmp/berry-recipes.json
 Install a built‑in recipe into the repo:
 
 ```bash
-berry recipes install pr-prep
+berry recipes install search-learn
 ```
 
 Import a recipe JSON file into the repo:
