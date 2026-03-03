@@ -20,7 +20,7 @@ Notes:
 - Older configs may still pass `--server science` or `--server forge`; those values are treated as aliases for `classic`.
 
 ### `berry init`
-Create repo‑scoped MCP config files for supported clients.
+Create repo-scoped MCP config files for supported clients.
 
 ```
 berry init [--profile classic] [--project-root PATH] [--force] [--strict] [--no-claude-skill]
@@ -163,17 +163,17 @@ berry audit prune
 ## Recipes
 
 ### `berry recipes list`
-List built‑in recipes.
+List built-in recipes.
 
 ### `berry recipes export`
-Export built‑in recipes to a JSON file.
+Export built-in recipes to a JSON file.
 
 ```
 berry recipes export --out /path/to/recipes.json
 ```
 
 ### `berry recipes install`
-Install a built‑in recipe into the repo.
+Install a built-in recipe into the repo.
 
 ```
 berry recipes install <name> [--force]
@@ -189,7 +189,7 @@ berry recipes import /path/to/recipe.json [--force]
 ## Licensing
 
 ### `berry license set`
-Write a local license payload (paid layer scaffolding).
+Write a local license payload (used for paid features).
 
 ```
 berry license set [--plan pro] [--features feature1,feature2]
@@ -201,34 +201,34 @@ Print the local license payload (JSON).
 ## Client setup helpers
 
 ### `berry quickstart`
-Print the fastest path to first value.
+Print a minimal quickstart.
 
 ### `berry instructions`
-Print per‑client setup guidance.
+Print per-client setup guidance.
 
 ```
 berry instructions [--client cursor|codex|claude|gemini] [--name berry]
 ```
 
 ### `berry print-config`
-Print the per‑client config (for copy/paste).
+Print the per-client config (for copy/paste).
 
 ```
 berry print-config cursor|codex|claude|gemini [--name berry]
 ```
 
 ### `berry deeplink`
-Print a Cursor deep‑link for MCP install.
+Print a Cursor deep-link for MCP install.
 
 ```
 berry deeplink cursor [--name berry]
 ```
 
 ### `berry integrate`
-Best‑effort global registration for CLI clients that support it.
+Best-effort global registration for CLI clients that support it.
 
 This is primarily for **Claude Code** and **Codex** when you want Berry to show up
-without committing repo‑scoped config files.
+without committing repo-scoped config files.
 
 ```
 berry integrate [--client claude|codex] [--name berry] [--timeout 20] [--dry-run] [--json] [--managed] [--managed-only]
@@ -242,7 +242,7 @@ Options:
 Notes:
 
 - This command **skips** clients whose CLIs are not installed.
-- Repo‑scoped setup is still done via `berry init`.
+- Repo-scoped setup is still done via `berry init`.
 
 #### Platform support for `--managed`
 

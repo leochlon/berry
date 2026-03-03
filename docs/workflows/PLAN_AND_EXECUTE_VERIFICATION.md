@@ -7,9 +7,9 @@ Use this when you need a verified, dry-run plan before making any edits or runni
 ---
 
 
-> **Client note:** In practice, **only Codex** consistently seems willing and able to follow these skill steps end-to-end **without deviating or running away**. Some other MCP clients may skip citations/tool calls or drift into “vibes.” If that happens, paste the **Copy/paste prompt** block verbatim and require the verifier tool call before accepting the answer.
+> **Client note:** MCP clients vary in how reliably they follow multi-step prompts (especially citations and required tool calls). If your client skips steps, treat the **Copy/paste prompt** block as a system instruction and require the verifier tool call before accepting the answer.
 >
-> **Claude tip:** In Claude, start in **`/plan` mode** and ask it to create a plan for this exact workflow skill (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute that plan step-by-step**, including the Strawberry verifier call, before it gives a final answer. This makes it much more likely to stay on-plan so you don’t have to babysit drift.
+> **Claude tip:** Starting in `/plan` mode and asking Claude to execute the plan can help preserve multi-step workflows.
 
 
 ## Phase 1 — Search & Learn (repo understanding)
@@ -63,12 +63,12 @@ If any step is flagged:
 
 ---
 
-## Worked example (max contrast): add feature flag to a service
+## Worked example (without vs with verification): add a feature flag to a service
 
-### ❌ Without Strawberry (plan drifts into guesses)
+### Without verification (plan drifts into guesses)
 **User:** Plan a feature flag rollout for endpoint `/v2/search`.
 
-**Assistant (vibes):**
+**Assistant (speculative):**
 - “Add `FEATURE_SEARCH_V2` flag to config.”
 - “Update middleware to check flag.”
 - “Add unit tests for config.”
@@ -79,7 +79,7 @@ If any step is flagged:
 - endpoints may live in a different module
 - test framework may not support the described integration tests
 
-### ✅ With Strawberry (dry-run plan + audit_trace_budget)
+### With verification (dry-run plan + audit_trace_budget)
 
 #### 1) Evidence pack
 **S0 — config module**
@@ -143,4 +143,4 @@ async def api_client(...):
 }
 ```
 
-**Why this is a “wow” difference:** you get a plan you can trust, without running any commands or editing files, and every step is grounded in evidence.
+**Why this helps:** it makes the plan reviewable by grounding each step in cited evidence and running a verifier before any edits.

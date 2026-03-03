@@ -99,7 +99,7 @@ def _find_repo_root(start: Path) -> Path:
 def _write_claude_skill_file(project_root: Path, *, force: bool) -> Optional[Path]:
     """Write a repo-scoped Claude Code rules/skill file for Berry.
 
-    This reduces agent thrash by teaching the Berry state machine and tool roles.
+    This reduces redundant back-and-forth by teaching the Berry state machine and tool roles.
     """
     dst = project_root / ".claude" / "rules" / "berry.md"
     try:
@@ -487,15 +487,17 @@ def _normalize_base_url(raw: Optional[str]) -> Optional[str]:
 def _probe_openai_compat_logprobs(*, base_url: Optional[str], api_key: str, model: str) -> tuple[bool, str]:
     """Best-effort probe: does this endpoint+model return top_logprobs for chat.completions?"""
     try:
-        from openai import OpenAI  # type: ignore
+        from openai import OpenAI
     except Exception as e:
         return False, f"openai SDK not available: {e}"
 
-    kwargs: dict[str, object] = {"api_key": str(api_key), "timeout": 20}
-    if base_url:
-        kwargs["base_url"] = str(base_url)
-
-    client = OpenAI(**kwargs)
+    try:
+        if base_url:
+            client = OpenAI(api_key=str(api_key), base_url=str(base_url), timeout=20.0)
+        else:
+            client = OpenAI(api_key=str(api_key), timeout=20.0)
+    except Exception as e:
+        return False, f"failed to initialize openai client: {e}"
 
     try:
         resp = client.chat.completions.create(
@@ -531,7 +533,7 @@ def _probe_openai_compat_logprobs(*, base_url: Optional[str], api_key: str, mode
 def _probe_vertex_logprobs(*, base_url: Optional[str], access_token: str, model: str) -> tuple[bool, str]:
     """Best-effort probe: does this Vertex model return logprobsResult for generateContent?"""
     try:
-        import httpx  # type: ignore
+        import httpx
     except Exception as e:
         return False, f"httpx not available: {e}"
 
@@ -576,7 +578,7 @@ def _probe_vertex_logprobs(*, base_url: Optional[str], access_token: str, model:
 def _probe_gemini_logprobs(*, base_url: Optional[str], api_key: str, model: str) -> tuple[bool, str]:
     """Best-effort probe: does this Gemini model return logprobsResult for generateContent?"""
     try:
-        import httpx  # type: ignore
+        import httpx
     except Exception as e:
         return False, f"httpx not available: {e}"
 
@@ -729,7 +731,10 @@ def cmd_setup_set(args: argparse.Namespace) -> int:
         env.pop("GEMINI_API_KEY", None)
         env.pop("GEMINI_BASE_URL", None)
         env["VERTEX_ACCESS_TOKEN"] = api_key
-        env["VERTEX_BASE_URL"] = base_url
+        if base_url:
+            env["VERTEX_BASE_URL"] = base_url
+        else:
+            env.pop("VERTEX_BASE_URL", None)
         if vertex_project:
             env["VERTEX_PROJECT"] = vertex_project
         if vertex_location:
@@ -743,7 +748,10 @@ def cmd_setup_set(args: argparse.Namespace) -> int:
         env.pop("VERTEX_PROJECT", None)
         env.pop("VERTEX_LOCATION", None)
         env["GEMINI_API_KEY"] = api_key
-        env["GEMINI_BASE_URL"] = base_url
+        if base_url:
+            env["GEMINI_BASE_URL"] = base_url
+        else:
+            env.pop("GEMINI_BASE_URL", None)
     else:
         env["BERRY_VERIFIER_BACKEND"] = "openai"
         env.pop("VERTEX_ACCESS_TOKEN", None)
@@ -1115,7 +1123,7 @@ def build_parser() -> argparse.ArgumentParser:
     recipes_install.add_argument("--force", action="store_true")
     recipes_install.set_defaults(fn=cmd_recipes_install)
 
-    lic = sub.add_parser("license", help="License/entitlements (paid layer scaffolding)")
+    lic = sub.add_parser("license", help="License/entitlements (paid features)")
     lic_sub = lic.add_subparsers(dest="license_cmd", required=True)
     lic_set = lic_sub.add_parser("set")
     lic_set.add_argument("--plan", default="pro")
@@ -1124,7 +1132,7 @@ def build_parser() -> argparse.ArgumentParser:
     lic_show = lic_sub.add_parser("show")
     lic_show.set_defaults(fn=cmd_license_show)
 
-    quick = sub.add_parser("quickstart", help="Print the fastest path to first value")
+    quick = sub.add_parser("quickstart", help="Print a minimal quickstart")
     quick.set_defaults(fn=cmd_quickstart)
 
     inst = sub.add_parser("instructions", help="Per-client setup copy/paste guidance")

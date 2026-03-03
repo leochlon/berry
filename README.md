@@ -1,19 +1,17 @@
 # Berry
 
-## Workflow verification playbooks
+Berry is a local MCP server for evidence-first workflows. It gives agents a small, repo-scoped toolset for collecting evidence and verifying whether claims are supported.
 
-Want the “with vs without hallucination detector” experience? Start here:
+## Workflow playbooks
 
-- `docs/workflows/README.md` — index of workflow playbooks
-  - Search & Learn
-  - Generate Boilerplate/Content
-  - Inline Completions
-  - Greenfield Prototyping
-  - RCA Fix Agent
+Start with `docs/workflows/README.md` (index of workflow playbooks). Each playbook includes:
 
-Each playbook includes a **maximally contrasting** worked example (❌ vibes vs ✅ evidence + verifier).
+- a short checklist
+- a worked example without verification (common failure modes)
+- a worked example with verification (evidence pack + verifier call)
+- a copy/paste prompt you can pin in your client
 
-Berry runs a local MCP server with a safe, repo‑scoped toolpack plus verification tools (`detect_hallucination`, `audit_trace_budget`).
+## MCP surface
 
 Berry ships a single MCP surface: **classic**.
 
@@ -21,7 +19,7 @@ Classic includes:
 - Verification tools (`detect_hallucination`, `audit_trace_budget`)
 - Run & evidence notebook tools (start/load runs, add/list/search spans)
 
-See `docs/MCP.md` and `docs/workflows/README.md`.
+See `docs/MCP.md` and `docs/workflows/README.md` for details.
 
 Berry integrates with Cursor, Codex, Claude Code, and Gemini CLI via config files committed to your repo.
 
@@ -74,7 +72,7 @@ berry init --strict
 
 3) Reload MCP servers in your client.
 
-Optional: register Berry globally (user-level configs) so you don't have to commit repo files:
+Optional: register Berry globally (user-level configs) so you do not need to commit repo files:
 
 ```bash
 berry integrate
@@ -87,7 +85,7 @@ berry integrate
 
 ## Docs
 
-- `docs/USAGE.md` — task‑oriented guides
+- `docs/USAGE.md` — task-oriented guides
 - `docs/CLI.md` — command reference
 - `docs/CONFIGURATION.md` — config files, defaults, and env vars
 - `docs/MCP.md` — tools/prompts and transport details

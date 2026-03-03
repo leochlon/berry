@@ -7,9 +7,9 @@ Use this when you're asking questions, exploring unfamiliar codebases, or trying
 ---
 
 
-> **Client note:** In practice, **only Codex** consistently seems willing and able to follow these skill steps end-to-end **without deviating or running away**. Some other MCP clients may skip citations/tool calls or drift into “vibes.” If that happens, paste the **Copy/paste prompt** block verbatim and require the verifier tool call before accepting the answer.
+> **Client note:** MCP clients vary in how reliably they follow multi-step prompts (especially citations and required tool calls). If your client skips steps, treat the **Copy/paste prompt** block as a system instruction and require the verifier tool call before accepting the answer.
 >
-> **Claude tip:** In Claude, start in **`/plan` mode** and ask it to create a plan for this exact workflow skill (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute that plan step-by-step**, including the Strawberry verifier call, before it gives a final answer. This makes it much more likely to stay on-plan so you don’t have to babysit drift.
+> **Claude tip:** Starting in `/plan` mode and asking Claude to execute the plan can help preserve multi-step workflows.
 
 
 ## Problem / question
@@ -19,7 +19,7 @@ Use this when you're asking questions, exploring unfamiliar codebases, or trying
 ## Evidence pack
 **This is part of the skill.** Strawberry does *verification*, not retrieval — so evidence must be collected by the agent (repo browsing, web search, experiments) or pasted by the user.
 
-If you don’t yet have spans, **stop here** and either:
+If you do not yet have spans, collect them first:
 - collect the minimal snippets you need (code/doc/log output), or
 - ask the user to paste them.
 
@@ -50,12 +50,12 @@ If anything is flagged:
 
 ---
 
-## Worked example (max contrast): “Does auth validate JWT aud+iss?”
+## Worked example (without vs with verification): "Does auth validate JWT aud+iss?"
 
-### ❌ Without Strawberry (vibes)
+### Without verification (speculative)
 **User:** Does this repo’s auth validate JWT `aud` and `iss`? Where is it configured?
 
-**Assistant (sounds confident, but vibing):**
+**Assistant (confident, but ungrounded):**
 - “Yes — the middleware validates issuer and audience via `jsonwebtoken.verify()` using `JWT_ISSUER` and `JWT_AUDIENCE` env vars.”
 - “It’s configured in `config/auth.ts` and loaded from `.env`.”
 - “To disable audience validation, set `audience: undefined`.”
@@ -65,7 +65,7 @@ If anything is flagged:
 - “disable audience validation” advice may be incorrect for the library in use
 - it’s unverifiable unless you manually hunt through the repo
 
-### ✅ With Strawberry (evidence-first + `audit_trace_budget`)
+### With verification (evidence-first + `audit_trace_budget`)
 
 #### 1) Evidence pack (spans you collect or paste)
 **S0 — middleware code**

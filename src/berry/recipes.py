@@ -39,7 +39,7 @@ _BUILTIN: List[Recipe] = [
     ),
     Recipe(
         name="greenfield-prototype",
-        title="Greenfield prototyping (facts vs vibes)",
+        title="Greenfield prototyping (facts vs assumptions)",
         description="Workflow prompt pack for fast prototyping while separating facts, decisions, and assumptions with verification.",
         author="Berry",
         prompts=["greenfield_prototyping_verified"],

@@ -1,8 +1,8 @@
 # Berry roadmap (verification-first)
 
-Berry's core bet: you can't *prompt* LLMs into being reliable; you must **enforce** verification at the MCP tool boundary.
+Berry's premise: prompting does not make models reliable; verification must be enforced at the MCP tool boundary.
 
-## Shipped (core verification toolkit)
+## Shipped (verification toolkit)
 
 - **Evidence-based runs**: `start_run` anchors a problem statement and deliverable; spans collect evidence throughout.
 - **Evidence collection**: `add_span`, `add_file_span`, `distill_span` for building trusted evidence.
@@ -10,11 +10,11 @@ Berry's core bet: you can't *prompt* LLMs into being reliable; you must **enforc
 - **Hallucination detection**: `detect_hallucination` scores answers with `[S#]` citations against evidence.
 - **Trace budget auditing**: `audit_trace_budget` verifies explicit (claim, cites) steps.
 - **Workflow prompts**: playbooks for RCA, PR prep, architecture summaries, etc.
-- **Setup ergonomics**: `berry init` writes client configs; `berry integrate` registers globally.
+- **Setup**: `berry init` writes client configs; `berry integrate` registers globally.
 
 ## Next
 
-- **Evidence authenticity**: add optional HMAC-signed spans so only server-minted spans are citeable.
+- **Evidence authenticity**: add optional HMAC-signed spans so only server-minted spans are citable.
 - **Export tools**: `export_run_bundle` (spans + audits + decisions) for debugging and compliance.
 
 ## Later

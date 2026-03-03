@@ -1,6 +1,6 @@
 # Packaging / distribution
 
-Berry is a Python CLI, but we ship a macOS installer for “just works” installs and a Homebrew cask for easy upgrades.
+Berry is a Python CLI. We also ship a macOS `.pkg` installer and a Homebrew cask.
 
 ## GitHub Actions release pipeline
 
@@ -12,7 +12,7 @@ On `v*` tags it:
 2) Codesigns the executable (Developer ID Application)
 3) Builds a `.pkg` installer and signs it (Developer ID Installer)
 4) Notarizes + staples the pkg
-5) Installs the pkg on the macOS runner and runs a smoke‑test (`scripts/validate_macos_pkg.sh`)
+5) Installs the pkg on the macOS runner and runs a smoke-test (`scripts/validate_macos_pkg.sh`)
 6) Uploads the pkg to the GitHub release
 7) Optionally updates the `hassana-labs/homebrew-tap` cask with new version + sha256 (or attach `berry.rb` for manual update)
 
@@ -79,9 +79,9 @@ This produces an unsigned pkg in `./build/macos_pkg/` unless signing/notary env 
 The pkg includes a `postinstall` hook (`scripts/macos_pkg_scripts/postinstall`) that:
 
 - Validates the `berry` binary is installed and runnable.
-- Attempts *best‑effort* global MCP registration for CLI clients (currently Claude Code and Codex) by running
+- Attempts *best-effort* global MCP registration for CLI clients (currently Claude Code and Codex) by running
   `berry integrate` as the active console user.
 
 Integration is non‑fatal: installation will not fail if the user does not have those client CLIs installed.
 
-Repo‑scoped setup is still done with `berry init` in each repo.
+Repo-scoped setup is still done with `berry init` in each repo.

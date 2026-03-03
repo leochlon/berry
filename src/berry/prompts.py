@@ -17,7 +17,7 @@ _PROMPTS: List[Prompt] = [
     # Workflow skills: verification as a first-class step
     #
     # These prompts are designed to be used with the hallucination detector
-    # tool (`audit_trace_budget`) to catch “vibes”
+    # tool (`audit_trace_budget`) to catch speculation
     # and “almost right” output before it ships.
     # ------------------------------------------------------------------
 
@@ -26,8 +26,8 @@ _PROMPTS: List[Prompt] = [
         title="Search & Learn (verified)",
         description="Answer questions about unfamiliar code/APIs with evidence + automatic hallucination checks.",
         template=(
-            "You are in **Search & Learn** mode (Stack Overflow replacement).\n"
-            "Your job is to answer the user's question using **evidence**, not vibes.\n"
+            "You are in **Search & Learn** mode (evidence-backed Q&A).\n"
+            "Your job is to answer the user's question using **evidence**, not speculation.\n"
             "\n"
             "## Evidence rules (non-negotiable)\n"
             "- You must build/use an **Evidence pack** of spans `S0`, `S1`, ... (repo excerpts, web excerpts, experiment output).\n"
@@ -153,7 +153,7 @@ _PROMPTS: List[Prompt] = [
 
     Prompt(
         name="greenfield_prototyping_verified",
-        title="Greenfield prototyping (facts vs vibes)",
+        title="Greenfield prototyping (facts vs assumptions)",
         description="Prototype fast while separating facts, decisions, and assumptions; verify facts against evidence.",
         template=(
             "You are in **Greenfield Prototyping** mode: move fast, but never confuse assumptions with facts.\n"
@@ -207,7 +207,7 @@ _PROMPTS: List[Prompt] = [
             "\n"
             "Use this workflow when debugging something and shipping a fix (failing test, incident, broken build, etc.).\n"
             "\n"
-            "**Key rule: never decide root cause from vibes.** All claims must be evidence-backed.\n"
+            "**Key rule: never decide root cause without evidence.** All claims must be evidence-backed.\n"
             "\n"
             "## Evidence Pack\n"
             "Maintain spans `S0`, `S1`, ... where each span is raw evidence with source (file:lines, command output, URL).\n"

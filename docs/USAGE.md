@@ -1,14 +1,14 @@
 # Berry usage
 
-## Workflow playbooks (evidence-gated)
+## Workflow playbooks (verification-gated)
 
-If you're using Strawberry/Berry to catch “vibes”, the fastest path is the workflow playbooks:
+Start with the workflow playbooks:
 
 - `docs/workflows/README.md`
 
 Each includes a worked **without vs with** example and copy/paste prompts for the verifier tools.
 
-This is the practical guide to using Berry with MCP clients.
+This section covers using Berry with MCP clients.
 
 ## Install Berry (from repo)
 
@@ -61,7 +61,7 @@ To also enable strict verification gates for this repo (writes `./.berry/config.
 berry init --strict
 ```
 
-This creates repo‑scoped config files:
+This creates repo-scoped config files:
 - `.cursor/mcp.json`
 - `.codex/config.toml`
 - `.mcp.json` (Claude Code)
@@ -84,13 +84,13 @@ berry print-config claude
 berry print-config gemini
 ```
 
-Cursor deep‑link (installs in Cursor directly):
+Cursor deep-link (installs in Cursor directly):
 
 ```bash
 berry deeplink cursor
 ```
 
-Per‑client setup hints:
+Per-client setup hints:
 
 ```bash
 berry instructions
@@ -100,7 +100,7 @@ berry instructions
 
 Some clients support global MCP registration (so Berry can appear without committing repo config files).
 
-To register Berry globally (best‑effort):
+To register Berry globally (best-effort):
 
 ```bash
 berry integrate
@@ -176,19 +176,19 @@ berry audit prune
 
 ## Recipes
 
-List built‑in recipes:
+List built-in recipes:
 
 ```bash
 berry recipes list
 ```
 
-Export built‑ins to a JSON file:
+Export built-ins to a JSON file:
 
 ```bash
 berry recipes export --out /tmp/berry-recipes.json
 ```
 
-Install a built‑in recipe into the repo:
+Install a built-in recipe into the repo:
 
 ```bash
 berry recipes install search-learn

@@ -53,8 +53,8 @@ If present, `./.berry/config.json` overrides global keys for that repo.
 Used by the MCP server:
 
 - `BERRY_HOME` — override the Berry home directory.
-- `BERRY_HOST` — default host for non‑stdio transports.
-- `BERRY_PORT` — default port for non‑stdio transports.
+- `BERRY_HOST` — default host for non-stdio transports.
+- `BERRY_PORT` — default port for non-stdio transports.
 - `BERRY_PROJECT_ROOT` — force the project root for the server.
 - `BERRY_ENFORCE_VERIFICATION` — override `enforce_verification` (truthy values: `1,true,yes,y,on`).
 - `BERRY_WEB_SEARCH_PROVIDER` — override `web_search_provider` (duckduckgo|brave|searxng|stub).

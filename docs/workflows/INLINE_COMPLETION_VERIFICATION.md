@@ -13,9 +13,9 @@ Inline completions are too frequent to verify constantly — so use this as a **
 ---
 
 
-> **Client note:** In practice, **only Codex** consistently seems willing and able to follow these skill steps end-to-end **without deviating or running away**. Some other MCP clients may skip citations/tool calls or drift into “vibes.” If that happens, paste the **Copy/paste prompt** block verbatim and require the verifier tool call before accepting the answer.
+> **Client note:** MCP clients vary in how reliably they follow multi-step prompts (especially citations and required tool calls). If your client skips steps, treat the **Copy/paste prompt** block as a system instruction and require the verifier tool call before accepting the answer.
 >
-> **Claude tip:** In Claude, start in **`/plan` mode** and ask it to create a plan for this exact workflow skill (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute that plan step-by-step**, including the Strawberry verifier call, before it gives a final answer. This makes it much more likely to stay on-plan so you don’t have to babysit drift.
+> **Claude tip:** Starting in `/plan` mode and asking Claude to execute the plan can help preserve multi-step workflows.
 
 
 ## What changed
@@ -56,23 +56,23 @@ Run the verifier:
   - `default_target=0.95` (strict: treat as review gate)
 
 If anything is flagged:
-- do **not** “explain it away”
+- do not rationalize flagged steps
 - propose a safer edit, or request the missing evidence span (contract/test/log)
 - If the verifier is run 3 times in a row, **STOP** and return only the claims that passed plus the claims that flagged and why they flagged.
 
 ---
 
-## Worked example (max contrast): “helpful retry” that can double-charge
+## Worked example (without vs with verification): "helpful retry" that can double-charge
 
-### ❌ Without Strawberry (silent regression)
+### Without verification (silent regression)
 **User:** Is this completion okay?
 
-**Assistant (vibes):**  
-“Yep — retries are standard and improve reliability.”
+**Assistant (speculative):**
+> “Yep — retries are standard and improve reliability.”
 
-Result: you ship a subtle, expensive bug.
+Result: risk of duplicate charges.
 
-### ✅ With Strawberry (micro-trace + `audit_trace_budget`)
+### With verification (micro-trace + `audit_trace_budget`)
 
 #### 1) Evidence pack
 **S0 — contract comment**
@@ -136,4 +136,4 @@ retry(fn, {retries}) retries on ANY thrown error.
 - Remove retry logic from `/charge`. [S0]  
 - If you need reliability, introduce idempotency keys + server-side dedupe **only if** supported by specs (otherwise label as Assumption and request requirements). [S0]
 
-**Why this is a “wow” difference:** Strawberry turns “tab complete” into something you can safely accept — because it forces the model to prove the change is consistent with the local contract.
+**Why this helps:** it turns a fast completion into a reviewable change by requiring a cited micro-trace and a verifier run.

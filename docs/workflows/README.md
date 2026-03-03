@@ -1,33 +1,28 @@
-# Workflow verification playbooks (with vs without Strawberry)
+# Workflow verification playbooks
 
-These playbooks show how to use Strawberry (Berry’s hallucination detector) as a **verification step** to catch when a model “vibed” instead of using real evidence.
+These playbooks show a repeatable pattern for using Strawberry (Berry’s verifier) as a review gate:
 
+1) Collect evidence into spans (`S0`, `S1`, ...).
+2) Produce output that cites those spans (`[S0]`).
+3) Run a verifier tool (`audit_trace_budget` or `detect_hallucination`).
+4) Revise until unsupported claims are removed or downgraded.
 
-## Client adherence note (read this once)
+## Client notes
 
-These playbooks are written as **skills**: a tight sequence of “collect evidence → write with citations → run the verifier → revise”.
+MCP clients vary in how consistently they follow multi-step prompts (especially citations and required tool calls). If your client skips steps:
 
-In practice, MCP clients vary in how strictly they execute that sequence.
+- Use the playbook’s “Copy/paste prompt” block as a system instruction.
+- Require the verifier tool call before accepting a final answer.
+- In Claude, starting in `/plan` mode and then asking it to execute the plan can help preserve multi-step workflows.
 
-- **Codex**: best adherence — it tends to follow the skill end-to-end (citations + verifier tool calls) **without deviating or running away**.
-- **Claude**: start in **`/plan` mode** and ask it to create a step-by-step plan for the exact workflow skill you want (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute the plan** and require the Strawberry tool call before the final answer. This makes Claude much more likely to stay on-plan so you don’t have to keep checking for drift.
+## Tools
 
-**Claude `/plan` starter (copy/paste):**
-```
-/plan
-Create a plan to execute the Strawberry-assisted workflow skill I’m using (e.g., `rca-fix-agent`, `search-and-learn`, etc.).
-Your plan must include: (1) evidence collection steps and the resulting evidence pack spans (S0, S1, ...), (2) output with citations, (3) a Strawberry verifier tool call, (4) a revision step if anything is flagged.
-Then execute the plan step-by-step, and do not produce a final answer until the verifier has run.
+- `audit_trace_budget` — verify an explicit list of `(claim, cites)` steps.
+- `detect_hallucination` — check an answer with `[S#]` citations against evidence spans.
 
-If you don’t have direct access to collect evidence (repo browsing, web search, or running experiments), your plan must explicitly stop and ask the user to paste the missing spans before you proceed.
-```
-- **Other clients**: may treat prompts as suggestions (skip tool calls, drop citations, or “run away” into speculative answers).
-
-If you’re using a client that drifts, don’t fight it — **pin the “Copy/paste prompt” block** from each playbook as a system instruction, and explicitly require the tool call before a final answer.
-
-**One tool, five workflows:**
-- `audit_trace_budget` — verify a cited reasoning trace (claims + cites)
-- If a verifier is run 3 times in a row, STOP and return only the claims that passed plus the claims that flagged and why they flagged.
+If you run a verifier 3 times in a row, stop and return only:
+- the claims that passed
+- the claims that were flagged (and why)
 
 ---
 
@@ -37,23 +32,25 @@ If you’re using a client that drifts, don’t fight it — **pin the “Copy/p
    Q&A / repo exploration / API understanding. Uses `audit_trace_budget` (short trace).
 
 2) **Generate Boilerplate/Content** → `GENERATE_BOILERPLATE_VERIFICATION.md`
-   Tests/docs/migrations/configs. Uses `audit_trace_budget` on the trace to verify *constraints and decisions*.
+   Tests/docs/migrations/configs. Uses `audit_trace_budget` to validate the design trace behind the artifact.
 
 3) **Inline Completions** → `INLINE_COMPLETION_VERIFICATION.md`
    Spot-check high-impact tab-complete. Uses `audit_trace_budget` on a 3–6 step micro-trace.
 
 4) **Greenfield Prototyping** → `GREENFIELD_PROTOTYPE_VERIFICATION.md`
-   Move fast with **Facts vs Decisions vs Assumptions**, and verify Facts via `audit_trace_budget` (trace of Facts).
+   Separate facts, decisions, and assumptions. Verify the Facts via `audit_trace_budget`.
 
 5) **Plan and Execute** → `PLAN_AND_EXECUTE_VERIFICATION.md`
-   Repo understanding + verified plan. Dry-run only (no commands or edits). Uses `audit_trace_budget` on plan steps.
+   Repo understanding + verified dry-run plan. Uses `audit_trace_budget` on plan steps.
 
 6) **RCA Fix Agent** → MCP prompt `rca_fix_agent` + `RCA_FIX_REPORT_TEMPLATE.md`
-   Full debugging loop: baseline → hypotheses → verify ROOT_CAUSE → fix → test → verify claims. Uses `audit_trace_budget` for minimum claims (ROOT_CAUSE, FIX_MECHANISM, FIX_VERIFIED, NO_NEW_FAILURES).
+   Full debugging loop: baseline → hypotheses → verify root cause → fix → test → verify claims.
 
 ---
 
-## What “max contrast” means here
-Each playbook includes a worked example with:
-- **❌ Without Strawberry** — a plausible, confident answer that’s easy to hallucinate
-- **✅ With Strawberry** — evidence pack spans + citations + a verifier call, ending in an answer you can trust
+## Worked examples
+
+Each playbook includes two worked examples:
+
+- **Without verification** — plausible output that is not grounded in evidence
+- **With verification** — evidence spans + citations + a verifier call

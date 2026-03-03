@@ -2,14 +2,14 @@
 
 Use this when generating tests, docs, synthetic data, config files, or migrations.
 
-**Goal:** avoid boilerplate that is "almost right" (plausible, compiles, but encodes wrong assumptions).
+**Goal:** avoid boilerplate that is "almost right" (plausible, compiles, but encodes incorrect assumptions).
 
 ---
 
 
-> **Client note:** In practice, **only Codex** consistently seems willing and able to follow these skill steps end-to-end **without deviating or running away**. Some other MCP clients may skip citations/tool calls or drift into “vibes.” If that happens, paste the **Copy/paste prompt** block verbatim and require the verifier tool call before accepting the answer.
+> **Client note:** MCP clients vary in how reliably they follow multi-step prompts (especially citations and required tool calls). If your client skips steps, treat the **Copy/paste prompt** block as a system instruction and require the verifier tool call before accepting the answer.
 >
-> **Claude tip:** In Claude, start in **`/plan` mode** and ask it to create a plan for this exact workflow skill (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute that plan step-by-step**, including the Strawberry verifier call, before it gives a final answer. This makes it much more likely to stay on-plan so you don’t have to babysit drift.
+> **Claude tip:** Starting in `/plan` mode and asking Claude to execute the plan can help preserve multi-step workflows.
 
 
 ## Artifact request
@@ -58,12 +58,12 @@ If anything is flagged:
 
 ---
 
-## Worked example (max contrast): migration for case-insensitive unique email per tenant
+## Worked example (without vs with verification): migration for case-insensitive unique email per tenant
 
-### ❌ Without Strawberry (boilerplate that looks right)
+### Without verification (boilerplate that looks right)
 **User:** Generate a migration to add a unique constraint on `users.email` and update docs.
 
-**Assistant (vibes):**
+**Assistant (speculative):**
 ```sql
 ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE(email);
 ```
@@ -72,9 +72,9 @@ Docs: “Email must be unique and case-insensitive.”
 **Typical hidden problems:**
 - table might not be `users`
 - uniqueness might be **per tenant**
-- case-insensitive uniqueness usually requires `lower(email)` (or `citext`) — easy to promise, easy to forget to implement
+- case-insensitive uniqueness usually requires `lower(email)` (or `citext`) and must be explicitly enforced (not just documented)
 
-### ✅ With Strawberry (`audit_trace_budget` validates the *decisions*)
+### With verification (`audit_trace_budget` validates the *decisions*)
 
 #### 1) Evidence pack
 **S0 — schema**
@@ -158,4 +158,4 @@ ON account_users (tenant_id, lower(email));
 - Emails must be unique per tenant. [S2][S3]
 - Uniqueness is case-insensitive (enforced by a lower(email) unique index). [S2]
 
-**Why this is a “wow” difference:** Strawberry verifies the *reasons* behind the boilerplate, so the output encodes real constraints instead of plausible SQL.
+**Why this helps:** it verifies the reasoning behind the artifact, so the output reflects real constraints instead of plausible-but-wrong boilerplate.

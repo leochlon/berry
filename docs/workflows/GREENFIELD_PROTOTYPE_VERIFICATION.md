@@ -1,6 +1,6 @@
 # Greenfield Prototyping Verification Skill
 
-Use this in "vibe code" prototyping where requirements are incomplete.
+Use this for early prototyping when requirements are incomplete.
 
 **Goal:** move fast without pretending assumptions are facts.
 
@@ -12,9 +12,9 @@ The pattern:
 ---
 
 
-> **Client note:** In practice, **only Codex** consistently seems willing and able to follow these skill steps end-to-end **without deviating or running away**. Some other MCP clients may skip citations/tool calls or drift into “vibes.” If that happens, paste the **Copy/paste prompt** block verbatim and require the verifier tool call before accepting the answer.
+> **Client note:** MCP clients vary in how reliably they follow multi-step prompts (especially citations and required tool calls). If your client skips steps, treat the **Copy/paste prompt** block as a system instruction and require the verifier tool call before accepting the answer.
 >
-> **Claude tip:** In Claude, start in **`/plan` mode** and ask it to create a plan for this exact workflow skill (e.g., “rca-fix-agent”, “search-and-learn”, etc.). Then tell it to **execute that plan step-by-step**, including the Strawberry verifier call, before it gives a final answer. This makes it much more likely to stay on-plan so you don’t have to babysit drift.
+> **Claude tip:** Starting in `/plan` mode and asking Claude to execute the plan can help preserve multi-step workflows.
 
 
 ## Goal
@@ -22,7 +22,7 @@ The pattern:
 - What is “good enough” for this prototype?
 
 ## Evidence pack
-**This is part of the skill.** Prototypes fail when assumptions get smuggled in as “facts.”
+**This is part of the skill.** Prototypes fail when assumptions are presented as facts.
 
 So first, collect a tiny evidence pack (requirements, constraints, repo context, web refs, experiments). If you can’t collect it automatically, ask the user to paste it.
 
@@ -45,7 +45,7 @@ Suggested spans:
 
 ## Assumptions (explicitly declared)
 - Throughput/latency goals, “exactly-once”, tech choices not in evidence, etc.
-- These are allowed — just don’t smuggle them in as Facts.
+- These are allowed, but they must stay in Assumptions (not Facts).
 
 ## Verification
 Run:
@@ -63,21 +63,21 @@ If any Fact is flagged:
 
 ---
 
-## Worked example (max contrast): prototype an events ingestion API
+## Worked example (without vs with verification): prototype an events ingestion API
 
-### ❌ Without Strawberry (prototype becomes a fake spec)
+### Without verification (prototype becomes a fake spec)
 **User:** Prototype an events ingestion API.
 
-**Assistant (vibes):**
+**Assistant (speculative):**
 - “Exactly-once delivery”
 - “Kafka pipeline”
 - “99p < 50ms”
 - “GDPR compliant by default”
 - “RBAC and audit logs”
 
-It reads great — and it’s mostly invented unless explicitly required.
+It reads well, but it’s mostly invented unless explicitly required.
 
-### ✅ With Strawberry (Facts vs Decisions vs Assumptions + `audit_trace_budget`)
+### With verification (Facts vs Decisions vs Assumptions + `audit_trace_budget`)
 
 #### 1) Evidence pack
 **S0 — requirements**
@@ -141,4 +141,4 @@ Events may contain PII. Must support deletion by user_id.
 }
 ```
 
-**Why this is a “wow” difference:** Strawberry forces the prototype to be *honest*. You can still move fast — but now you can tell what’s real vs what’s invented.
+**Why this helps:** it makes the prototype explicit about what is proven vs assumed, while still letting you move quickly.

@@ -41,17 +41,14 @@ Berry exposes a focused set of tools for evidence collection and hallucination d
 
 ### Prompts (workflows)
 
-> **Client adherence note:** Prompt/skill support varies across MCP clients.
-> - **Codex** is the most reliable at following workflow prompts end-to-end (citations + required Strawberry verifier tool calls).
-> - In **Claude**, using **`/plan` mode** and asking it to produce a plan for the workflow skill (then executing that plan) makes it much more likely to stay on-plan and run the verifier autonomously.
-> - Other clients may treat prompts as suggestions.
->
-> If you see drift, pin the playbook prompt text as a system instruction and insist the verifier tools are called before final answers.
+> **Client note:** MCP clients vary in how reliably they follow multi-step workflows (citations + tool calls).
+> If your client skips steps, treat the playbook prompt text as a system instruction and require the verifier tool call before accepting a final answer.
+> In Claude, starting in `/plan` mode and then asking it to execute the plan can help preserve multi-step workflows.
 
 - Search & Learn (verified)
 - Generate Boilerplate/Content (verified)
 - Inline completion guard (verified)
-- Greenfield prototyping (facts vs vibes)
+- Greenfield prototyping (facts vs assumptions)
 - **RCA Fix Agent** — full debugging loop with evidence-backed root cause, verified fix, and test plan
 
 ## Transports
