@@ -298,8 +298,12 @@ def score_trace_budget(
 
         prior_prompts.append(build_yes_prompt(spans=null_spans, claim=claim))
 
-    post_results = backend.call_text_batch(
-        prompts=post_prompts,
+    # The "with the cited evidence" (post) and "with it hidden" (prior) prompts do not depend on
+    # each other, so they go out together as ONE batch: the check takes one round trip, not two.
+    # (They used to run as two batches one after the other, with a gc.collect() in between.)
+    n = len(post_prompts)
+    all_results = backend.call_text_batch(
+        prompts=post_prompts + prior_prompts,
         model=verifier_model,
         instructions="Reply with exactly one token: YES, NO, or UNSURE.",
         temperature=temperature,
@@ -308,20 +312,10 @@ def score_trace_budget(
         top_logprobs=int(top_logprobs),
         reasoning=reasoning,
     )
+    post_results, prior_results = all_results[:n], all_results[n:]
 
     if hasattr(backend, "reset_state"):
         backend.reset_state()
-
-    prior_results = backend.call_text_batch(
-        prompts=prior_prompts,
-        model=verifier_model,
-        instructions="Reply with exactly one token: YES, NO, or UNSURE.",
-        temperature=temperature,
-        max_output_tokens=5,
-        include_logprobs=True,
-        top_logprobs=int(top_logprobs),
-        reasoning=reasoning,
-    )
 
     out: List[BudgetResult] = []
     for idx, claim, cites, target, post_tr, prior_tr in zip(idxs, claims, cites_list, targets, post_results, prior_results):

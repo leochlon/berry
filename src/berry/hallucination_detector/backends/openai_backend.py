@@ -12,7 +12,12 @@ except Exception:
     OpenAI = None  # type: ignore
 
 
-_thread_local = threading.local()
+# One client per (timeout, base_url, api_key), shared by every thread. The OpenAI client is
+# thread-safe and keeps a connection pool, so calls after the first reuse an open connection
+# instead of paying DNS + TLS setup each time. (This used to be a per-thread cache, and a new
+# thread pool is built for every batch, so in practice every call opened a fresh connection.)
+_client_cache: Dict[Any, Any] = {}
+_client_lock = threading.Lock()
 
 
 def _get_client(*, timeout_s: Optional[float] = None, base_url: Optional[str] = None, api_key: Optional[str] = None) -> Any:
@@ -28,24 +33,22 @@ def _get_client(*, timeout_s: Optional[float] = None, base_url: Optional[str] = 
         raise ValueError("OPENAI_API_KEY is not set (required for OpenAI backend)")
 
     key = (timeout_s, base_url, api_key)
-    cache = getattr(_thread_local, "clients", None)
-    if cache is None:
-        cache = {}
-        _thread_local.clients = cache
-    if key in cache:
-        return cache[key]
+    with _client_lock:
+        cached = _client_cache.get(key)
+        if cached is not None:
+            return cached
 
-    kwargs: Dict[str, Any] = {}
-    if timeout_s is not None:
-        kwargs["timeout"] = timeout_s
-    if base_url is not None:
-        kwargs["base_url"] = base_url
-    if api_key is not None:
-        kwargs["api_key"] = api_key
+        kwargs: Dict[str, Any] = {}
+        if timeout_s is not None:
+            kwargs["timeout"] = timeout_s
+        if base_url is not None:
+            kwargs["base_url"] = base_url
+        if api_key is not None:
+            kwargs["api_key"] = api_key
 
-    client = OpenAI(**kwargs) if kwargs else OpenAI()
-    cache[key] = client
-    return client
+        client = OpenAI(**kwargs) if kwargs else OpenAI()
+        _client_cache[key] = client
+        return client
 
 
 @dataclass

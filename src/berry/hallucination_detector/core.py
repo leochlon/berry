@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import os
 import re
+import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -187,7 +188,7 @@ def run_detect_hallucination(
     citation_regex: Optional[str] = None,
     temperature: float = 0.0,
     top_logprobs: int = 10,
-    max_concurrency: int = 8,
+    max_concurrency: int = 32,  # one round for all claims (post + prior); was 8
     timeout_s: Optional[float] = 30.0,
     units: str = "bits",
     context_mode: str = "all",
@@ -197,6 +198,7 @@ def run_detect_hallucination(
     pool_json_path: Optional[str] = None,
     local_llm_model_path: Optional[str] = None,
 ) -> Dict[str, Any]:
+    _t0 = time.perf_counter()
     span_objs = _normalize_spans(spans)
     if not span_objs:
         return {"flagged": True, "under_budget": True, "error": "No spans provided (cannot verify citations).", "details": []}
@@ -270,6 +272,7 @@ def run_detect_hallucination(
         "flagged": flagged,
         "under_budget": flagged,
         "summary": {
+            "elapsed_ms": round((time.perf_counter() - _t0) * 1000),
             "claims_scored": len(details),
             "flagged_claims": len(flagged_idxs),
             "flagged_idxs": flagged_idxs[:50],
@@ -290,7 +293,7 @@ def run_audit_trace_budget(
     placeholder: str = "[REDACTED]",
     temperature: float = 0.0,
     top_logprobs: int = 10,
-    max_concurrency: int = 8,
+    max_concurrency: int = 32,  # one round for all claims (post + prior); was 8
     timeout_s: Optional[float] = 30.0,
     units: str = "bits",
     context_mode: str = "all",
@@ -300,6 +303,7 @@ def run_audit_trace_budget(
     pool_json_path: Optional[str] = None,
     local_llm_model_path: Optional[str] = None,
 ) -> Dict[str, Any]:
+    _t0 = time.perf_counter()
     span_objs = _normalize_spans(spans)
     step_objs = _normalize_steps(steps, default_target=float(default_target))
     trace = Trace(steps=step_objs, spans=span_objs)
@@ -380,6 +384,7 @@ def run_audit_trace_budget(
         "flagged": flagged,
         "under_budget": flagged,
         "summary": {
+            "elapsed_ms": round((time.perf_counter() - _t0) * 1000),
             "steps_scored": len(out),
             "flagged_steps": sum(1 for x in out if x["flagged"]),
             "units": units,
