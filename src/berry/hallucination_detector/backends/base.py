@@ -34,7 +34,7 @@ class OpenAIBackend:
         )
 
     def call_text_batch(self, *, prompts: Sequence[str], **kwargs: Any) -> List[TextResult]:
-        max_workers = max(1, int(self.cfg.max_concurrency))
+        max_workers = max(1, min(int(self.cfg.max_concurrency), len(prompts) or 1))
         with cf.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futs = [ex.submit(self.call_text, prompt=p, **kwargs) for p in prompts]
             return [f.result() for f in futs]
@@ -59,7 +59,7 @@ class VertexBackend:
         )
 
     def call_text_batch(self, *, prompts: Sequence[str], **kwargs: Any) -> List[TextResult]:
-        max_workers = max(1, int(self.cfg.max_concurrency))
+        max_workers = max(1, min(int(self.cfg.max_concurrency), len(prompts) or 1))
         with cf.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futs = [ex.submit(self.call_text, prompt=p, **kwargs) for p in prompts]
             return [f.result() for f in futs]
@@ -84,7 +84,7 @@ class GeminiBackend:
         )
 
     def call_text_batch(self, *, prompts: Sequence[str], **kwargs: Any) -> List[TextResult]:
-        max_workers = max(1, int(self.cfg.max_concurrency))
+        max_workers = max(1, min(int(self.cfg.max_concurrency), len(prompts) or 1))
         with cf.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futs = [ex.submit(self.call_text, prompt=p, **kwargs) for p in prompts]
             return [f.result() for f in futs]
